@@ -246,6 +246,7 @@
   }
 
 
+  //please use initBids instead of createbids. do not call this method on your own//
   createBids = function(taskObjectId, bidPrice){
     userObjectId = getUserId();
     var Bids = Parse.Object.extend("Bids");
@@ -314,10 +315,10 @@
   }
 
   getCompleteBids = function(callback){
-    var Bids - Parse.Object.extend("Bids");
+    var Bids = Parse.Object.extend("Bids");
     var query = new Parse.Query(Bids);
     query.equalTo("status", "complete");
-
+    query.equalTo("userObjectId", );
     query.find({
       success: function(results){
         bids = []
@@ -340,10 +341,10 @@
     });
   }
 
-  getIncompleteBids = function(){
-    var Bids - Parse.Object.extend("Bids");
+  getIncompleteBids = function(callback){
+    var Bids = Parse.Object.extend("Bids");
     var query = new Parse.Query(Bids);
-    query.equalTo("status", "complete");
+    query.equalTo("status", "incomplete");
 
     query.find({
       success: function(results){
@@ -394,27 +395,26 @@
         callback(null);
       }
     });
-
   }
 
   test = function(){
     //userSignUp("test", "root", "chicken_mcnugget91@hotmail.com", "1234567");
-    userLogin("nasruddin", "password");
+    userLogin("test", "root");
 
     setTimeout(function(){
       startDate = new Date("October 13, 2015 11:13:00");
       endDate = new Date("October 16, 2015 11:13:00");
       endingBidDate = new Date("October 10, 2015 11:13:00");
       //createTask("running", "go running in the ocean and i'll pay ou one thousand dollars", "pasir ris", "sports", 20,10, startDate, endDate, endingBidDate);
-      getLatestTasks(function(){
-        if (tasks) {
+      getIncompleteBids(function(){
+        if (bids) {
           console.log("user id: " + getUserId());
-          console.log("im here");
-          console.log(tasks);
-          task = tasks[1];
-          taskObjectId = task['id'];
-          bidPrice = 9;
-          initBids(taskObjectId, bidPrice);
+          console.log(bids);
+          //for (var i=0; i< bids.length; i++){
+          // taskObjectId = tasks[i]['id'];
+          //  bidPrice = Math.floor((Math.random() * 20) + 1);
+          //  completeBid(taskObjectId);
+          //}
         }else{
           console.log("getTasksorted returns null");
         }

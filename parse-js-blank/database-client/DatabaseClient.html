@@ -4,6 +4,7 @@
 
   <script type="text/javascript">
   Parse.initialize("JgB3okJHjlrUhAaIjLUqs0o53EQdMzTVana6P0Tf", "EXWI6VPTdoGjyfiiJ71ILg17Vlv1ahgIC6ObVyUx");
+  var userId;
 
   /////sign up, return true if successful, return false if not successful///
   userSignUp = function(username, password, email, phone, callback){
@@ -32,6 +33,7 @@
     Parse.User.logIn(username, password, {
         success: function(user) {
           console.log("successful login")
+          userId = Parse.User.current().id;
         },
         error: function(user, error) {
           alert("Error: " + error.code + " " + error.message);
@@ -39,15 +41,17 @@
     });
   }
 
+
   userLogout = function(){
     Parse.User.logOut();
+    userId = null;
   }
 
   createTask = function(name, description, location, category, startingPrice, offerPrice, startDate, endDate, endingBidDate){
       var Task = Parse.Object.extend("Task");
       var task = new Task();
 
-      userObjectId = Parse.User.current().id;
+      userObjectId = userId;
 
       task.set("userObjectId", userObjectId);
       task.set("name", name);
@@ -71,7 +75,7 @@
   }
 
   getMyTasks = function(callback){
-    userObjectId = Parse.User.current().id;
+    userObjectId = userId;
 
     var Task = Parse.Object.extend("Task");
     var query = new Parse.Query(Task);
@@ -108,7 +112,7 @@
   getTasksBySortedPrice = function(callback){
     var Task = Parse.Object.extend("Task");
     var query = new Parse.Query(Task);
-    var userObjectId = Parse.User.current().id;
+    var userObjectId = userId;
 
     query.descending("offerPrice");
     //query.limit(15);
@@ -184,7 +188,7 @@
 
 
   createBids = function(taskObjectId, bidPrice){
-    userObjectId = Parse.User.current().id;
+    userObjectId = userId;
 
     var Bids = Parse.Object.extend("Bids");
     var bid = new Bids();
@@ -219,14 +223,15 @@
       ts = [];
       getTasksBySortedPrice(function(){
         if (tasks) {
-          ts = tasks;
+          console.log("im here");
           console.log(tasks);
+
+          createBids(tasks[0]['id'], 12);
+
         }else{
-          ts = []
           console.log("getTasksorted returns null");
         }
       });
-      createBids(ts[0].id, 12);
 
       Parse.User.current().id;
       userLogout();

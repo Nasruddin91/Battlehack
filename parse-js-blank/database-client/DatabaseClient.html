@@ -254,6 +254,7 @@
     bid.set("userObjectId", userObjectId);
     bid.set("taskObjectId", taskObjectId);
     bid.set("bidPrice", bidPrice);
+    bid.set("status", "incomplete");
 
 
     bid.save(null, {
@@ -284,6 +285,7 @@
           bid["userObjectId"] = b.get("userObjectId");
           bid["taskObjectId"] = b.get("taskObjectId");
           bid["bidPrice"] = b.get("bidPrice");
+          bid["status"] = b.get("status");
           bids.push(bid);
         }
         callback(bids);
@@ -293,6 +295,77 @@
         callback(null);
       }
     });
+  }
+
+  completeBid = function(taskObjectId){
+    var Bids = Parse.Object.extend("Bids");
+    var query = new Parse.Query(Bids);
+
+    query.equalTo("taskObjectId", taskObjectId);
+    query.first({
+      success: function(result){
+        result.set("status", "complete");
+        result.save();
+      },
+      error: function(error){
+        alert("Error: " + error.code + " " + error.message);
+      }
+    });
+  }
+
+  getCompleteBids = function(callback){
+    var Bids - Parse.Object.extend("Bids");
+    var query = new Parse.Query(Bids);
+    query.equalTo("status", "complete");
+
+    query.find({
+      success: function(results){
+        bids = []
+        for (var i=0; i < results.length; i++){
+          b = results[i];
+          bid = {};
+          bid["id"] = b.id;
+          bid["userObjectId"] = b.get("userObjectId");
+          bid["taskObjectId"] = b.get("taskObjectId");
+          bid["bidPrice"] = b.get("bidPrice");
+          bid["status"] = b.get("status");
+          bids.push(bid);
+        }
+        callback(bids);
+      },
+      error: function(error){
+        alert("Error: " + error.code + " " + error.message);
+        callback(null);
+      }
+    });
+  }
+
+  getIncompleteBids = function(){
+    var Bids - Parse.Object.extend("Bids");
+    var query = new Parse.Query(Bids);
+    query.equalTo("status", "complete");
+
+    query.find({
+      success: function(results){
+        bids = []
+        for (var i=0; i < results.length; i++){
+          b = results[i];
+          bid = {};
+          bid["id"] = b.id;
+          bid["userObjectId"] = b.get("userObjectId");
+          bid["taskObjectId"] = b.get("taskObjectId");
+          bid["bidPrice"] = b.get("bidPrice");
+          bid["status"] = b.get("status");
+          bids.push(bid);
+        }
+        callback(bids);
+      },
+      error: function(error){
+        alert("Error: " + error.code + " " + error.message);
+        callback(null);
+      }
+    });
+
   }
 
   getAllBids = function(callback){
@@ -311,6 +384,7 @@
           bid["userObjectId"] = b.get("userObjectId");
           bid["taskObjectId"] = b.get("taskObjectId");
           bid["bidPrice"] = b.get("bidPrice");
+          bid["status"] = b.get("status");
           bids.push(bid);
         }
         callback(bids);

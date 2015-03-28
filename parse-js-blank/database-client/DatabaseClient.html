@@ -1,10 +1,19 @@
 
 
   <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.4.0.min.js"></script>
+  <input type="hidden" id="userId">
 
   <script type="text/javascript">
   Parse.initialize("JgB3okJHjlrUhAaIjLUqs0o53EQdMzTVana6P0Tf", "EXWI6VPTdoGjyfiiJ71ILg17Vlv1ahgIC6ObVyUx");
-  var userId;
+
+  function setUserId(userId){
+    document.getElementById("userId").val = userId;
+
+  }
+
+  function getUserId(){
+    return document.getElementById("userId").val
+  }
 
   /////sign up, return true if successful, return false if not successful///
   userSignUp = function(username, password, email, phone, callback){
@@ -25,8 +34,8 @@
         alert("Error: " + error.code + " " + error.message);
       }
     });
-
   }
+
 
   ////login return id if sucessful
   userLogin = function(username, password){
@@ -34,6 +43,7 @@
         success: function(user) {
           console.log("successful login")
           userId = Parse.User.current().id;
+          setUserId(userId);
         },
         error: function(user, error) {
           alert("Error: " + error.code + " " + error.message);
@@ -44,14 +54,15 @@
 
   userLogout = function(){
     Parse.User.logOut();
-    userId = null;
+    //setUserId("");
+
   }
 
   createTask = function(name, description, location, category, startingPrice, offerPrice, startDate, endDate, endingBidDate){
       var Task = Parse.Object.extend("Task");
       var task = new Task();
 
-      userObjectId = userId;
+      userObjectId = getUserId();
 
       task.set("userObjectId", userObjectId);
       task.set("name", name);
@@ -75,7 +86,8 @@
   }
 
   getMyTasks = function(callback){
-    userObjectId = userId;
+    userObjectId = getUserId();
+
 
     var Task = Parse.Object.extend("Task");
     var query = new Parse.Query(Task);
@@ -112,7 +124,8 @@
   getTasksBySortedPrice = function(callback){
     var Task = Parse.Object.extend("Task");
     var query = new Parse.Query(Task);
-    var userObjectId = userId;
+    userObjectId = getUserId();
+
 
     query.descending("offerPrice");
     //query.limit(15);
@@ -184,12 +197,57 @@
 
   }
 
+  // checkBidExists = function(taskObjectId, callback){
+  //   userObjectId = userId;
 
+  //   var Bids = Parse.Object.extend("Bids");
+  //   var query = Parse.Query(Bids);
+  //   query.equalTo("taskObjectId", taskObjectId);
+  //   query.getFirstInBackground(new GetCallback<ParseObject>(){
+  //     public void done(ParseObject object, ParseException e){
+  //       if(e == null){
+  //         callback(true);
+  //       }else{
+  //         if(e.getCode() == ParseException.OBJECT_NOT_FOUND){
+  //           callback(false);
+  //         }else{
+  //           callback(false);
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
+
+  initBids = function(taskObjectId, bidPrice){
+    userObjectId = getUserId();
+    console.log("user object id: " + userObjectId);
+    var Bids = Parse.Object.extend("Bids");
+    var query = new Parse.Query(Bids);
+    query.equalTo("taskObjectId", taskObjectId);
+
+    query.find({
+      success: function(results){
+        userObjectId = getUserId();
+        if (results.length>0){
+          result = results[0];
+          if (result.get("bidPrice")>bidPrice){
+            result.set("bidPrice", bidPrice);
+            result.set("userObjectId", userObjectId);
+            result.save();
+          }
+        }else{
+          createBids(taskObjectId, bidPrice);
+        }
+      },
+      error: function(error){
+        createBids(taskObjectId, bidPrice);
+      }
+    });
+  }
 
 
   createBids = function(taskObjectId, bidPrice){
-    userObjectId = userId;
-
+    userObjectId = getUserId();
     var Bids = Parse.Object.extend("Bids");
     var bid = new Bids();
 
@@ -209,7 +267,7 @@
   }
 
   getMyBids = function(callback){
-    userObjectId = userId;
+    userObjectId = getUserId();
 
     var Bids = Parse.Object.extend("Bids");
     var query = new Parse.Query(Bids);
@@ -235,25 +293,54 @@
         callback(null);
       }
     });
+  }
+
+  getAllBids = function(callback){
+    userObjectId = getUserId();
+
+    var Bids = Parse.Object.extend("Bids");
+    var query = new Parse.Query(Bids);
+
+    query.find({
+      success: function(results){
+        bids = []
+        for (var i=0; i < results.length; i++){
+          b = results[i];
+          bid = {};
+          bid["id"] = b.id;
+          bid["userObjectId"] = b.get("userObjectId");
+          bid["taskObjectId"] = b.get("taskObjectId");
+          bid["bidPrice"] = b.get("bidPrice");
+          bids.push(bid);
+        }
+        callback(bids);
+      },
+      error: function(error){
+        alert("Error: " + error.code + " " + error.message);
+        callback(null);
+      }
+    });
 
   }
 
   test = function(){
     //userSignUp("test", "root", "chicken_mcnugget91@hotmail.com", "1234567");
-    userLogin("test", "root");
+    userLogin("nasruddin", "password");
 
     setTimeout(function(){
-
       startDate = new Date("October 13, 2015 11:13:00");
       endDate = new Date("October 16, 2015 11:13:00");
       endingBidDate = new Date("October 10, 2015 11:13:00");
       //createTask("running", "go running in the ocean and i'll pay ou one thousand dollars", "pasir ris", "sports", 20,10, startDate, endDate, endingBidDate);
-      console.log(Parse.User.current().id);
-      ts = [];
-      getMyBids(function(){
-        if (bids) {
+      getLatestTasks(function(){
+        if (tasks) {
+          console.log("user id: " + getUserId());
           console.log("im here");
-          console.log(bids);
+          console.log(tasks);
+          task = tasks[1];
+          taskObjectId = task['id'];
+          bidPrice = 9;
+          initBids(taskObjectId, bidPrice);
         }else{
           console.log("getTasksorted returns null");
         }

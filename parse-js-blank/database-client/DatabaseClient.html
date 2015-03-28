@@ -1,0 +1,79 @@
+
+
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.4.0.min.js"></script>
+
+  <script type="text/javascript">
+  Parse.initialize("JgB3okJHjlrUhAaIjLUqs0o53EQdMzTVana6P0Tf", "EXWI6VPTdoGjyfiiJ71ILg17Vlv1ahgIC6ObVyUx");
+
+
+  userSignUp = function(username, password, email, phone){
+
+    var user = new Parse.User();
+    user.set("username", username);
+    user.set("password", password);
+    user.set("email", email);
+     
+    // other fields can be set just like with Parse.Object
+    user.set("phone", phone);
+     
+    user.signUp(null, {
+      success: function(user) {
+        return true;
+      },
+      error: function(user, error) {
+        // Show the error message somewhere and let the user try again.
+        alert("Error: " + error.code + " " + error.message);
+        return false;
+      }
+    });
+
+  }
+
+  userLogin = function(username, password){
+    Parse.User.logIn(username, password, {
+        success: function(user) {
+          alert("succesfully logged in " + user.getObjectId());
+          return user.get("objectId");
+        },
+        error: function(user, error) {
+          return false;
+        }
+    });
+  }
+
+  getUserByUsername = function(username){
+
+
+  }
+
+  createTask = function(userObjectId, name, description, location, category, startingPrice, offerPrice, startDate, endDate, startingBidDate, endingBidDate){
+    var Task = Parse.Object.extend("Task");
+    var task = new Task();
+
+    task.set("userObjectId", userObjectId);
+    task.set("name", name);
+    task.set("description", description);
+    task.set("location", location);
+    task.set("category", category);
+    task.set("startingPrice", startingPrice);
+    task.set("offerPrice", offerPrice);
+    task.set("startDate", startDate);
+    task.set("endDate", endDate);
+    task.set("startingBidDate", startingBidDate);
+    task.set("endingBidDate", endingBidDate);
+
+    task.save(null, {
+      success: function(task){
+        return true;
+      },
+      error: function(task, error){
+        return false;
+      }
+    });
+  }
+
+  userLogin("nasruddin", "password")
+
+  createBids = function( ){}
+
+</script>

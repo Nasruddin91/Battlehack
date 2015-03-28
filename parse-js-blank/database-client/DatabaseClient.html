@@ -193,7 +193,6 @@
     var Bids = Parse.Object.extend("Bids");
     var bid = new Bids();
 
-
     bid.set("userObjectId", userObjectId);
     bid.set("taskObjectId", taskObjectId);
     bid.set("bidPrice", bidPrice);
@@ -209,6 +208,36 @@
     });
   }
 
+  getMyBids = function(callback){
+    userObjectId = userId;
+
+    var Bids = Parse.Object.extend("Bids");
+    var query = new Parse.Query(Bids);
+
+    query.equalTo("userObjectId", userObjectId);
+
+    query.find({
+      success: function(results){
+        bids = []
+        for (var i=0; i < results.length; i++){
+          b = results[i];
+          bid = {};
+          bid["id"] = b.id;
+          bid["userObjectId"] = b.get("userObjectId");
+          bid["taskObjectId"] = b.get("taskObjectId");
+          bid["bidPrice"] = b.get("bidPrice");
+          bids.push(bid);
+        }
+        callback(bids);
+      },
+      error: function(error){
+        alert("Error: " + error.code + " " + error.message);
+        callback(null);
+      }
+    });
+
+  }
+
   test = function(){
     //userSignUp("test", "root", "chicken_mcnugget91@hotmail.com", "1234567");
     userLogin("test", "root");
@@ -221,13 +250,10 @@
       //createTask("running", "go running in the ocean and i'll pay ou one thousand dollars", "pasir ris", "sports", 20,10, startDate, endDate, endingBidDate);
       console.log(Parse.User.current().id);
       ts = [];
-      getTasksBySortedPrice(function(){
-        if (tasks) {
+      getMyBids(function(){
+        if (bids) {
           console.log("im here");
-          console.log(tasks);
-
-          createBids(tasks[0]['id'], 12);
-
+          console.log(bids);
         }else{
           console.log("getTasksorted returns null");
         }

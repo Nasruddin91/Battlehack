@@ -5,9 +5,8 @@
   <script type="text/javascript">
   Parse.initialize("JgB3okJHjlrUhAaIjLUqs0o53EQdMzTVana6P0Tf", "EXWI6VPTdoGjyfiiJ71ILg17Vlv1ahgIC6ObVyUx");
 
-
+  /////sign up, return true if successful, return false if not successful///
   userSignUp = function(username, password, email, phone){
-
     var user = new Parse.User();
     user.set("username", username);
     user.set("password", password);
@@ -29,26 +28,98 @@
 
   }
 
+  ////login return id if sucessful
   userLogin = function(username, password){
     Parse.User.logIn(username, password, {
         success: function(user) {
-          alert("succesfully logged in " + user.getObjectId());
-          return user.get("objectId");
+          alert(user.id)
+          return true;
         },
         error: function(user, error) {
+        alert("Error: " + error.code + " " + error.message);
+
           return false;
         }
     });
   }
 
-  getUserByUsername = function(username){
-
-
+  userLogout = function(){
+    Parse.User.logOut();
   }
 
-  createTask = function(userObjectId, name, description, location, category, startingPrice, offerPrice, startDate, endDate, startingBidDate, endingBidDate){
+  createTask = function(name, description, location, category, startingPrice, offerPrice, startDate, endDate, endingBidDate){
+      var Task = Parse.Object.extend("Task");
+      var task = new Task();
+
+      userObjectId = Parse.User.current().id;
+
+      task.set("userObjectId", userObjectId);
+      task.set("name", name);
+      task.set("description", description);
+      task.set("location", location);
+      task.set("category", category);
+      task.set("startingPrice", startingPrice);
+      task.set("offerPrice", offerPrice);
+      task.set("startDate", startDate);
+      task.set("endDate", endDate);
+
+      task.set("endingBidDate", endingBidDate);
+
+      task.save(null, {
+        success: function(task){
+          return true;
+        },
+        error: function(task, error){
+          alert("Error: " + error.code + " " + error.message);
+          return false;
+        }
+      });
+  }
+
+  getMyTasks = function(){
+    userObjectId = Parse.User.current().id;
+
     var Task = Parse.Object.extend("Task");
-    var task = new Task();
+    var query = new Parse.Query(Task);
+
+    query.equalTo("userObjectId", userObjectId);
+    query.find({
+      success: function(results){
+        tasks = [];
+        for (var i=0; i< results.length; i++){ 
+          t = results[i];
+          //console.log(t);
+          task = {}
+          task["id"] = t.id;
+          task["startDate"] = t.get("startDate");
+          task["endDate"] = t.get("endDate");
+          task["description"] = t.get("description");
+          task["name"] = t.get("name");
+          task["location"] = t.get("location");
+          task["category"] = t.get("category");
+          task["endingBidDate"] = t.get("endingBidDate");
+          task["offerPrice"] = t.get("offerPrice");
+          task["startingPrice"] = t.get("startingPrice"); 
+          tasks.push(task);
+        }
+        console.log(tasks);
+        return task;
+      },
+      error: function(error){
+        alert("Error: " + error.code + " " + error.message);
+      }
+    });
+  }
+
+
+
+
+  createBids = function(taskObjectId, bidPrice){
+
+    var Bids = Parse.Object.extend("Bids");
+    var bid = new Bids();
+
+    userObjectId = Parse.User.current().id;
 
     task.set("userObjectId", userObjectId);
     task.set("name", name);
@@ -59,7 +130,7 @@
     task.set("offerPrice", offerPrice);
     task.set("startDate", startDate);
     task.set("endDate", endDate);
-    task.set("startingBidDate", startingBidDate);
+
     task.set("endingBidDate", endingBidDate);
 
     task.save(null, {
@@ -67,13 +138,25 @@
         return true;
       },
       error: function(task, error){
+        alert("Error: " + error.code + " " + error.message);
         return false;
       }
     });
   }
 
-  userLogin("nasruddin", "password")
+  test = function(){
+    userLogin("nasruddin", "password");
+    startDate = new Date("October 13, 2015 11:13:00");
+    console.log("startDate: " + startDate);
+    endDate = new Date("October 16, 2015 11:13:00");
+    console.log("endDate: " + endDate);
+    endingBidDate = new Date("October 10, 2015 11:13:00");
+    //createTask("swimming", "go swim in the ocean and i'll pay ou one thousand dollars", "pasir ris", "sports", 20,5, startDate, endDate, endingBidDate);
+    getMyTasks();
+    userLogout();
 
-  createBids = function( ){}
+  }
+
+  test()
 
 </script>
